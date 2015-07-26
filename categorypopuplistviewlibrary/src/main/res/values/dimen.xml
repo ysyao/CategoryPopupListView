@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="activity_horizontal_margin">16dp</dimen>
+    <dimen name="activity_vertical_margin">16dp</dimen>
+    <dimen name="activity_ui_margin_medium">8dp</dimen>
+    <dimen name="activity_ui_margin_large">10dp</dimen>
+    <dimen name="card_padding">17dp</dimen>
+    <dimen name="card_padding_bottom">8dp</dimen>
+    <dimen name="activity_ui_margin_small">4dp</dimen>
+    <dimen name="activity_ui_margin_tiny">2dp</dimen>
+    <dimen name="activity_login_margin">20dp</dimen>
+    <dimen name="title_textsize">18dp</dimen>
+    <dimen name="corner_size">13sp</dimen>
+    <dimen name="little_corner_size">6dp</dimen>
+    <dimen name="font_size_litte">15sp</dimen>
+    <dimen name="font_size_middle">18sp</dimen>
+    <dimen name="font_size_big">25sp</dimen>
+    <dimen name="card_color_length">10dp</dimen>
+    <dimen name="action_bar_menu_item_width">130dp</dimen>
+    <dimen name="set_item_height">40sp</dimen>
+    <dimen name="buy_applet_griditem_width">60dp</dimen>
+    <dimen name="applet_listitem_height">60dp</dimen>
+    <dimen name="applet_listitem_image_height">45dp</dimen>
+    <dimen name="message_list_margin">15dp</dimen>
+    <dimen name="mycard_margin">20dp</dimen>
+    <dimen name="font_size_tiny">12sp</dimen>
+    <dimen name="popupwindow_header_padding">4dp</dimen>
+    <dimen name="popupwindow_header_text_size">9sp</dimen>
+    <dimen name="category_activity_margin_horizontal">4dp</dimen>
+    <dimen name="category_activity_margin_vertical">-25dp</dimen>
+</resources>

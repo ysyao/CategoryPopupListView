@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- @drawable/触摸模式下单击时的背景图片 -->
+    <item android:drawable="@color/tool_bar_color" android:state_selected="true"/>
+    <item android:drawable="@color/tool_bar_color" android:state_focused="false" android:state_pressed="true"/>
+    <item android:drawable="@color/tool_bar_color" android:state_focused="true"/>
+    <!-- @drawable/非触摸模式下获得焦点并单击时的背景图片 -->
+    <item android:drawable="@color/tool_bar_color" android:state_focused="true"
+        android:state_pressed="true"/>
+
+    <item android:drawable="@android:color/transparent" android:state_focused="false"/>
+
+
+
+</selector>
