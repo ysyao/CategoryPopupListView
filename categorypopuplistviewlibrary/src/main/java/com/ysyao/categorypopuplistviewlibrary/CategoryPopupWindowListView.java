@@ -74,15 +74,21 @@ public class CategoryPopupWindowListView<T extends BodyAdapterItem, V extends Bo
                     childAdapter.updateAdapter(children);
                 }
 
+                T item = (T)adapterView.getAdapter().getItem(i);
+                mAdapter.setParentAdapterSelectedViewId(item.getId());
+                mAdapter.getParentAdapter().notifyDataSetChanged();
                 if (categoryPopupWindowBodyDelegator != null) {
-                    categoryPopupWindowBodyDelegator.onParentItemClicked((T)adapterView.getAdapter().getItem(i), adapterView, view, i , l);
+                    categoryPopupWindowBodyDelegator.onParentItemClicked(item, adapterView, view, i , l);
                 }
             }
         });
         childrenList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(context, i + "", Toast.LENGTH_SHORT).show();
+                V item = (V)adapterView.getAdapter().getItem(i);
+                mAdapter.setChildAdapterSelectedViewId(item.getId());
+                mAdapter.getChildAdapter(mAdapter.getParentSelectedViewId()).notifyDataSetChanged();
+
                 if (categoryPopupWindowBodyDelegator != null) {
                     categoryPopupWindowBodyDelegator.onChildItemClicked((V) adapterView.getAdapter().getItem(i), adapterView, view, i, l);
                 }

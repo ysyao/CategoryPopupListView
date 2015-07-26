@@ -19,26 +19,9 @@ public class CategoryPopupAdapter extends CategoryBodyAdapter<AppointmentParentI
         TextView name;
     }
 
-    private int parentSelectedViewId = 0;
-    private int childSelectedViewId = 0;
+
     public CategoryPopupAdapter(Context context, List<AppointmentParentItem> items) {
         super(context, items);
-    }
-
-    public void setParentAdapterSelectedViewId(int id) {
-        this.parentSelectedViewId = id;
-    }
-
-    public int getParentSelectedViewId() {
-        return parentSelectedViewId;
-    }
-
-    public void setChildAdapterSelectedViewId( int childId) {
-        this.childSelectedViewId = childId;
-    }
-
-    public int getChildSelectedViewId() {
-        return childSelectedViewId;
     }
 
     @Override
@@ -53,7 +36,7 @@ public class CategoryPopupAdapter extends CategoryBodyAdapter<AppointmentParentI
             holder = (ParentViewHolder) view.getTag();
         }
         holder.description.setText(appointmentParentItem.getName());
-        if (parentSelectedViewId == appointmentParentItem.getId()) {
+        if (getParentSelectedViewId() == appointmentParentItem.getId()) {
             holder.description.setTextColor(getContext().getResources().getColor(R.color.ghc_green_color));
             view.setBackgroundColor(getContext().getResources().getColor(R.color.tool_bar_color));
         } else {
@@ -75,7 +58,7 @@ public class CategoryPopupAdapter extends CategoryBodyAdapter<AppointmentParentI
             holder = (ChildViewHolder) view.getTag();
         }
         holder.name.setText(appointmentChildItem.getDescription());
-        if (childSelectedViewId == appointmentChildItem.getId()) {
+        if (getChildSelectedViewId() == appointmentChildItem.getId()) {
             holder.name.setTextColor(getContext().getResources().getColor(R.color.ghc_green_color));
         } else {
             holder.name.setTextColor(getContext().getResources().getColor(android.R.color.tertiary_text_light));

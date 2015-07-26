@@ -28,7 +28,6 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements
         CategoryBar.OnCategoryBarItemClicked,
-        SearchView.OnQueryTextListener,
         CategoryPopupWindowBodyDelegator,
         PopupWindowDisplayDelegator {
     private MyCategoryBar mCategoryBar;
@@ -50,17 +49,36 @@ public class MainActivity extends AppCompatActivity implements
         mCategoryBar.setOnCategroyBarItemClickedListener(this);
     }
 
-
-    private List<AppointmentParentItem> initItems() {
+    private List<AppointmentParentItem> initItems(int param) {
+        String parent;
+        String child;
+        switch (param) {
+            case 0:
+                parent = "蘑菇";
+                child = "好吃";
+                break;
+            case 1:
+                parent = "开车";
+                child = "费劲";
+                break;
+            case 2:
+                parent = "睡觉";
+                child = "起不来";
+                break;
+            default:
+                parent = "蘑菇";
+                child = "好吃";
+                break;
+        }
         List<AppointmentParentItem> items = new ArrayList<>();
         for (int i=0;i<10;i++) {
             AppointmentParentItem item = new AppointmentParentItem();
-            item.setName("蘑菇" + i);
+            item.setName(parent + i);
             item.setId(i);
             List<AppointmentChildItem> childItems = new ArrayList<>();
             for (int j=0;j<20;j++) {
                 AppointmentChildItem childItem = new AppointmentChildItem();
-                childItem.setDescription("好吃" + i + j);
+                childItem.setDescription(child + i + j);
                 childItem.setId(i*10+j);
                 childItems.add(childItem);
             }
@@ -76,7 +94,7 @@ public class MainActivity extends AppCompatActivity implements
         if (mBody == null) {
             //在popup window当中的view
             CategoryPopupWindowListView categoryPopupWindowListView = new CategoryPopupWindowListView(this);
-            categoryPopupAdapter =new CategoryPopupAdapter(this, initItems());
+            categoryPopupAdapter =new CategoryPopupAdapter(this, initItems(position));
             categoryPopupWindowListView.setAdapter(categoryPopupAdapter);
             //当popup window当中parent listview或child listview被点击的回调函数
             categoryPopupWindowListView.setCategoryPopupWindowBodyDelegator(this);
@@ -87,32 +105,20 @@ public class MainActivity extends AppCompatActivity implements
 
             //categorybar会根据popup window的展示和隐藏修改ui
             mBody.setCategoryBarHeaderDelegator(mCategoryBar);
+        } else {
+            categoryPopupAdapter.updateAdapter(initItems(position));
         }
         mBody.dismiss();
         mBody.show(view);
     }
 
     @Override
-    public boolean onQueryTextSubmit(String s) {
-        return false;
-    }
-
-    @Override
-    public boolean onQueryTextChange(String s) {
-        Toast.makeText(this, s, Toast.LENGTH_SHORT).show();
-        return true;
-    }
-
-    @Override
     public void onParentItemClicked(BodyAdapterItem bodyAdapterItem, AdapterView adapterView, View view, int i, long l) {
-        categoryPopupAdapter.setParentAdapterSelectedViewId(bodyAdapterItem.getId());
-        categoryPopupAdapter.getParentAdapter().notifyDataSetChanged();
     }
 
     @Override
     public void onChildItemClicked(BodyAdapterChildItem bodyAdapterChildItem, AdapterView adapterView, View view, int i, long l) {
-        categoryPopupAdapter.setChildAdapterSelectedViewId(bodyAdapterChildItem.getId());
-        categoryPopupAdapter.getChildAdapter(categoryPopupAdapter.getParentSelectedViewId()).notifyDataSetChanged();
+        Toast.makeText(this, "child id:" + bodyAdapterChildItem.getId(), Toast.LENGTH_SHORT).show();
     }
 
     @Override

@@ -44,8 +44,6 @@ public class CategoryPopupWindowBody<T extends BodyAdapterItem, V extends BodyAd
         if(popupWindow != null && popupWindow.isShowing()) {
             popupWindow.dismiss();
         }
-
-
     }
 
     public void setCategoryBarHeaderDelegator(CategoryBarHeaderDelegator categoryBarHeaderDelegator) {
