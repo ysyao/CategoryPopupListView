@@ -7,26 +7,40 @@ import android.view.ViewGroup;
 
 import java.util.ArrayList;
 import java.util.List;
-
 public abstract class CategoryBodyAdapter<T extends BodyAdapterItem, V extends BodyAdapterChildItem> {
     private Context context;
     private List<T> items;
     private BaseListAdapter<T> parentAdapter;
     private BaseListAdapter<V> childAdapter;
-    private int parentSelectedViewId = 0;
-    private int childSelectedViewId = 0;
+
+    /**
+     * 1.Category Barè‡ªå¸¦æ¥å£ï¼Œå½“adapterå½“åˆå§‹åŒ–parentIdæˆ–è€…childIdæ•°æ®æ—¶ï¼Œéœ€é€šè¿‡categoryBarHeaderDelegator
+     * æ¥ä¿®æ”¹å­˜å‚¨åœ¨å…¶ä¸­çš„parentIdå’ŒchildIdã€‚
+     * 2.å½“adpateréœ€è¦æ›´æ–°æ•°æ®æ—¶ï¼Œåˆ¤æ–­æ›´æ–°çš„æ•°æ®ä¸­æ˜¯å¦æœ‰ä¹‹å‰é€‰ä¸­çš„parentIdå’ŒchildIdï¼Œæœ‰åˆ™æ ¹æ®é€‰ä¸­parentId
+     * è®¾å®šå±•ç¤ºchildæ•°ç»„æ•°æ®ï¼Œæ²¡æœ‰åˆ™åˆå§‹åŒ–ã€‚
+     */
+    private CategoryBarHeaderDelegator categoryBarHeaderDelegator;
 
     public CategoryBodyAdapter(Context context, List<T> items) {
         this.context = context;
         this.items = items;
     }
 
+    public void setCategoryBarHeaderDelegator(CategoryBarHeaderDelegator categoryBarHeaderDelegator) {
+        this.categoryBarHeaderDelegator = categoryBarHeaderDelegator;
+    }
+
+    public CategoryBarHeaderDelegator getCategoryBarHeaderDelegator() {
+        return categoryBarHeaderDelegator;
+    }
+
     /**
-     * ´´½¨parentAdapter£¬adapter¾ßÌåµÄlayoutÓÉÓÃ»§×ÔĞĞÈ·¶¨
+     * åˆ›å»ºparentAdapterï¼Œadapterå…·ä½“çš„layoutç”±ç”¨æˆ·è‡ªè¡Œç¡®å®š
      * @return Parent Adapter
      */
     public BaseListAdapter<T> getParentAdapter() {
         if (parentAdapter == null) {
+            //è¿”å›listadapter
             parentAdapter = new BaseListAdapter<T>(context, new ArrayList<>(items)) {
 
                 @Override
@@ -34,14 +48,19 @@ public abstract class CategoryBodyAdapter<T extends BodyAdapterItem, V extends B
                     return getParentView(getItem(i), getInflater(), i, view, viewGroup);
                 }
             };
-            parentSelectedViewId = parentAdapter.getItem(0).getId();
+
+            //åˆå§‹åŒ–é€‰ä¸­parentIdï¼Œè®¾å®šæˆä¸ºç¬¬ä¸€ä¸ªæ•°æ®
+            int parentId = parentAdapter.getItem(0).getId();
+            if (categoryBarHeaderDelegator != null) {
+                categoryBarHeaderDelegator.setChoosedParentId(parentId);
+            }
         }
         return parentAdapter;
     }
 
     /**
-     * ´´½¨child adapter,adapter¾ßÌåµÄlayoutÓÉÓÃ»§×ÔĞĞÈ·¶¨
-     * @param parentViewId  ±»Ñ¡ÖĞµÄparent view id
+     * åˆ›å»ºchild adapter,adapterå…·ä½“çš„layoutç”±ç”¨æˆ·è‡ªè¡Œç¡®å®š
+     * @param parentViewId  è¢«é€‰ä¸­çš„parent view id
      * @return              Child Adapter
      */
     public BaseListAdapter<V> getChildAdapter(int parentViewId) {
@@ -53,74 +72,74 @@ public abstract class CategoryBodyAdapter<T extends BodyAdapterItem, V extends B
                     return getChildView(getItem(i), getInflater(), i, view, viewGroup);
                 }
             };
-            childSelectedViewId = childAdapter.getItem(0).getId();
+            //åˆå§‹åŒ–é€‰ä¸­childIdï¼Œè®¾å®šæˆä¸ºç¬¬ä¸€ä¸ªæ•°æ®
+            int childId = childAdapter.getItem(0).getId();
+            if (categoryBarHeaderDelegator != null) {
+                categoryBarHeaderDelegator.setChoosedChildId(childId);
+            }
         }
         return childAdapter;
     }
 
     /**
-     * µ±Õ¹Ê¾Êı¾İĞèÒª¸üĞÂµÄÊ±ºò£¬µ÷ÓÃ´Ë·½·¨
-     * @param items ¸üĞÂµÄÊı¾İ
+     * å½“å±•ç¤ºæ•°æ®éœ€è¦æ›´æ–°çš„æ—¶å€™ï¼Œè°ƒç”¨æ­¤æ–¹æ³•
+     * @param items æ›´æ–°çš„æ•°æ®
      */
-    public void updateAdapter( List<T> items) {
+    public void updateAdapter(List<T> items) {
         this.items.clear();
         this.items.addAll(items);
         parentAdapter.updateAdapter(new ArrayList<T>(items));
-        childAdapter.updateAdapter(new ArrayList<V>(items.get(0).getChildrenItems()));
 
-        parentSelectedViewId = parentAdapter.getItem(0).getId();
-        childSelectedViewId = childAdapter.getItem(0).getId();
-    }
+        //åœ¨adapteråˆ‡æ¢æ•°æ®çš„æ—¶å€™ï¼Œéœ€è¦é€šè¿‡categoryBarHeaderDelegatoræ¥æŸ¥çœ‹æ˜¯å¦å·²ç»å­˜å‚¨äº†parentIdå’Œ
+        //childIdï¼Œå¦‚æœæœ‰ï¼Œåˆ™å°†å­˜å‚¨çš„idè®¾ç½®ä¸ºé€‰ä¸­idã€‚
+        int index = 0;
+        for (T item : items) {
+            //æŸ¥è¯¢é€‰ä¸­çš„parentId
+            int parentId = categoryBarHeaderDelegator.getChoosedParentId();
+            //å¦‚æœè¿™é‡Œè¿˜æ²¡æœ‰è®¾ç½®é€‰ä¸­parentIdï¼Œåˆ™å°†idè®¾å®šä¸ºitemså½“ä¸­çš„ç¬¬ä¸€ä¸ª
+            if (parentId == CategoryBar.DEFULT_SELECTED_VALUE) {
+                categoryBarHeaderDelegator.setChoosedParentId(items.get(0).getId());
+                V v = (V)items.get(0).getChildrenItems().get(0);
+                categoryBarHeaderDelegator.setChoosedChildId(v.getId());
+            }
 
-    public T getParentItem(int position) {
-        return items.get(position);
-    }
+            //åœ¨itemså½“ä¸­æ‰¾åˆ°ä¸é€‰ä¸­idåŒ¹é…çš„idã€‚
+            if (item.getId() == categoryBarHeaderDelegator.getChoosedParentId()) {
+                index = items.indexOf(item);
+            }
+        }
 
-    public V getChildItem(int i, int j) {
-        return (V)items.get(i).getChildrenItems().get(j);
+        //æ›´æ–°childadapterå½“ä¸­çš„æ•°æ®
+        childAdapter.updateAdapter(new ArrayList<V>(items.get(index).getChildrenItems()));
     }
 
     /**
-     * ´´½¨parent adapterÃ¿Ò»ĞĞµÄlayout£¬ÓëÒ»°ãlistviewÖĞadapterµÄgetView·½·¨´óÍ¬Ğ¡Òì£¬ÕâÀïÖ»²»¹ıÊÇ½«
-     * µ±Ç°Î»ÖÃµÄÊı¾İ(Ä³¸öPOJOÀàĞÍµÄitem)×÷Îª²ÎÊıÉèÖÃµ½ÁË·½·¨Ö®ÖĞ£¬¼ò»¯ÓÃ»§µ÷ÓÃgetItem(int position)µÄ
-     * ¹ı³Ì¡£
-     * @param t         ÔÚÄ³¸öÎ»ÖÃ£¨position)ÉÏParent AdapterµÄitemÊı¾İ
+     * åˆ›å»ºparent adapteræ¯ä¸€è¡Œçš„layoutï¼Œä¸ä¸€èˆ¬listviewä¸­adapterçš„getViewæ–¹æ³•å¤§åŒå°å¼‚ï¼Œè¿™é‡Œåªä¸è¿‡æ˜¯å°†
+     * å½“å‰ä½ç½®çš„æ•°æ®(æŸä¸ªPOJOç±»å‹çš„item)ä½œä¸ºå‚æ•°è®¾ç½®åˆ°äº†æ–¹æ³•ä¹‹ä¸­ï¼Œç®€åŒ–ç”¨æˆ·è°ƒç”¨getItem(int position)çš„
+     * è¿‡ç¨‹ã€‚
+     * @param t         åœ¨æŸä¸ªä½ç½®ï¼ˆposition)ä¸ŠParent Adapterçš„itemæ•°æ®
      * @param inflater  LayoutInflater
-     * @param position  µ±Ç°Î»ÖÃ
+     * @param position  å½“å‰ä½ç½®
      * @param view      view
-     * @param parent    ¸ùviewGroup
-     * @return          listviewµ±ÖĞÃ¿¸öµ¥Î»µÄitem
+     * @param parent    æ ¹viewGroup
+     * @return          listviewå½“ä¸­æ¯ä¸ªå•ä½çš„item
      */
     public abstract View getParentView(T t, LayoutInflater inflater, int position, View view, ViewGroup parent);
 
     /**
-     * ´´½¨child adapterÃ¿Ò»ĞĞµÄlayout£¬ÓëÒ»°ãlistviewÖĞadapterµÄgetView·½·¨´óÍ¬Ğ¡Òì£¬ÕâÀïÖ»²»¹ıÊÇ½«
-     * µ±Ç°Î»ÖÃµÄÊı¾İ(Ä³¸öPOJOÀàĞÍµÄitem)×÷Îª²ÎÊıÉèÖÃµ½ÁË·½·¨Ö®ÖĞ£¬¼ò»¯ÓÃ»§µ÷ÓÃgetItem(int position)µÄ
-     * ¹ı³Ì¡£
-     * @param v         ÔÚÄ³¸öÎ»ÖÃ£¨position)ÉÏChild AdapterµÄitemÊı¾İ
+     * åˆ›å»ºchild adapteræ¯ä¸€è¡Œçš„layoutï¼Œä¸ä¸€èˆ¬listviewä¸­adapterçš„getViewæ–¹æ³•å¤§åŒå°å¼‚ï¼Œè¿™é‡Œåªä¸è¿‡æ˜¯å°†
+     * å½“å‰ä½ç½®çš„æ•°æ®(æŸä¸ªPOJOç±»å‹çš„item)ä½œä¸ºå‚æ•°è®¾ç½®åˆ°äº†æ–¹æ³•ä¹‹ä¸­ï¼Œç®€åŒ–ç”¨æˆ·è°ƒç”¨getItem(int position)çš„
+     * è¿‡ç¨‹ã€‚
+     * @param v         åœ¨æŸä¸ªä½ç½®ï¼ˆposition)ä¸ŠChild Adapterçš„itemæ•°æ®
      * @param inflater  LayoutInflater
-     * @param position  µ±Ç°Î»ÖÃ
+     * @param position  å½“å‰ä½ç½®
      * @param view      view
-     * @param parent    ¸ùviewGroup
-     * @return           listviewµ±ÖĞÃ¿¸öµ¥Î»µÄitem
+     * @param parent    æ ¹viewGroup
+     * @return           listviewå½“ä¸­æ¯ä¸ªå•ä½çš„item
      */
     public abstract View getChildView(V v, LayoutInflater inflater, int position, View view, ViewGroup parent);
     protected Context getContext() {
         return context;
     }
-    public void setParentAdapterSelectedViewId(int id) {
-        this.parentSelectedViewId = id;
-    }
-
-    public int getParentSelectedViewId() {
-        return parentSelectedViewId;
-    }
-
-    public void setChildAdapterSelectedViewId( int childId) {
-        this.childSelectedViewId = childId;
-    }
-
-    public int getChildSelectedViewId() {
-        return childSelectedViewId;
-    }
 }
+

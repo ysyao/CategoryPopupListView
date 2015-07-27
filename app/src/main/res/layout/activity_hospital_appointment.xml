@@ -11,7 +11,10 @@
         android:layout_alignParentTop="true"
         android:id="@+id/category_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        app:headerPictureRight="@drawable/ic_menu_arrow_down"
+        app:headerTextColor="@color/category_bar_header_text_color"
+        app:headerTextSize="@dimen/popupwindow_header_text_size"/>
 
     <FrameLayout
         android:id="@+id/popup_window_area"

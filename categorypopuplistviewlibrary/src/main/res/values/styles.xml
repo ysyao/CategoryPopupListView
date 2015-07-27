@@ -1,0 +1,8 @@
+<resources>
+
+    <declare-styleable name="CategoryBar">
+        <attr name="headerTextSize" format="dimension"/>
+        <attr name="headerTextColor" format="color"/>
+        <attr name="headerPictureRight" format="reference"/>
+    </declare-styleable>
+</resources>

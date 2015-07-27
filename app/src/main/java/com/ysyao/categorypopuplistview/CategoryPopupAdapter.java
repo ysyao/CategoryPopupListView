@@ -9,7 +9,6 @@ import android.widget.TextView;
 import com.ysyao.categorypopuplistviewlibrary.CategoryBodyAdapter;
 
 import java.util.List;
-
 public class CategoryPopupAdapter extends CategoryBodyAdapter<AppointmentParentItem, AppointmentChildItem> {
 
     class ParentViewHolder {
@@ -36,7 +35,7 @@ public class CategoryPopupAdapter extends CategoryBodyAdapter<AppointmentParentI
             holder = (ParentViewHolder) view.getTag();
         }
         holder.description.setText(appointmentParentItem.getName());
-        if (getParentSelectedViewId() == appointmentParentItem.getId()) {
+        if (getCategoryBarHeaderDelegator().getChoosedParentId() == appointmentParentItem.getId()) {
             holder.description.setTextColor(getContext().getResources().getColor(R.color.ghc_green_color));
             view.setBackgroundColor(getContext().getResources().getColor(R.color.tool_bar_color));
         } else {
@@ -58,7 +57,7 @@ public class CategoryPopupAdapter extends CategoryBodyAdapter<AppointmentParentI
             holder = (ChildViewHolder) view.getTag();
         }
         holder.name.setText(appointmentChildItem.getDescription());
-        if (getChildSelectedViewId() == appointmentChildItem.getId()) {
+        if (getCategoryBarHeaderDelegator().getChoosedChildId() == appointmentChildItem.getId()) {
             holder.name.setTextColor(getContext().getResources().getColor(R.color.ghc_green_color));
         } else {
             holder.name.setTextColor(getContext().getResources().getColor(android.R.color.tertiary_text_light));

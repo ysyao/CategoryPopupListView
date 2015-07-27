@@ -1,11 +1,8 @@
 package com.ysyao.categorypopuplistview;
 
-import android.graphics.RectF;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.SearchView;
-import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.FrameLayout;
@@ -15,20 +12,17 @@ import com.ysyao.categorypopuplistviewlibrary.BodyAdapterChildItem;
 import com.ysyao.categorypopuplistviewlibrary.BodyAdapterItem;
 import com.ysyao.categorypopuplistviewlibrary.CategoryBar;
 import com.ysyao.categorypopuplistviewlibrary.CategoryPopupWindowBody;
-import com.ysyao.categorypopuplistviewlibrary.CategoryPopupWindowBodyDelegator;
 import com.ysyao.categorypopuplistviewlibrary.CategoryPopupWindowListView;
+import com.ysyao.categorypopuplistviewlibrary.CategoryPopupWindowListViewDelegator;
 import com.ysyao.categorypopuplistviewlibrary.PopupWindowDisplayDelegator;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
 
 public class MainActivity extends AppCompatActivity implements
         CategoryBar.OnCategoryBarItemClicked,
-        CategoryPopupWindowBodyDelegator,
+        CategoryPopupWindowListViewDelegator,
         PopupWindowDisplayDelegator {
     private MyCategoryBar mCategoryBar;
     private FrameLayout popupWindowArea;
@@ -74,12 +68,13 @@ public class MainActivity extends AppCompatActivity implements
         for (int i=0;i<10;i++) {
             AppointmentParentItem item = new AppointmentParentItem();
             item.setName(parent + i);
-            item.setId(i);
+            item.setId(param*100+i*10);
             List<AppointmentChildItem> childItems = new ArrayList<>();
             for (int j=0;j<20;j++) {
                 AppointmentChildItem childItem = new AppointmentChildItem();
                 childItem.setDescription(child + i + j);
-                childItem.setId(i*10+j);
+                childItem.setId(param * 100 + i * 10 + j);
+                childItem.setParentId(i);
                 childItems.add(childItem);
             }
             item.setItems(childItems);
@@ -88,25 +83,28 @@ public class MainActivity extends AppCompatActivity implements
         return items;
     }
 
+
     @Override
     public void onItemClicked(View viewGroup, View view, int position) {
         //用POPOUPWINDOW来展示级联数据
         if (mBody == null) {
             //在popup window当中的view
             CategoryPopupWindowListView categoryPopupWindowListView = new CategoryPopupWindowListView(this);
-            categoryPopupAdapter =new CategoryPopupAdapter(this, initItems(position));
-            categoryPopupWindowListView.setAdapter(categoryPopupAdapter);
             //当popup window当中parent listview或child listview被点击的回调函数
-            categoryPopupWindowListView.setCategoryPopupWindowBodyDelegator(this);
+            categoryPopupWindowListView.setCategoryPopupWindowListViewDelegator(this);
 
             mBody = new CategoryPopupWindowBody<>(this, categoryPopupWindowListView);
             //当popup window show or dismiss的回调函数
-            mBody.setPopupWindowDelegator(this);
+            mBody.setPopupWindowDisplayDelegator(this);
 
             //categorybar会根据popup window的展示和隐藏修改ui
             mBody.setCategoryBarHeaderDelegator(mCategoryBar);
+
+            categoryPopupAdapter =new CategoryPopupAdapter(this, initItems(position));
+            categoryPopupWindowListView.setAdapter(categoryPopupAdapter);
         } else {
             categoryPopupAdapter.updateAdapter(initItems(position));
+            mBody.getCategoryPopupWindowListView().scrollToSelectedItem();
         }
         mBody.dismiss();
         mBody.show(view);

@@ -24,7 +24,8 @@ public class CategoryPopupWindowListView<T extends BodyAdapterItem, V extends Bo
     private BaseListAdapter<V> childAdapter;
     private CategoryBodyAdapter<T, V> mAdapter;
     private int lastSelected = -1;
-    private CategoryPopupWindowBodyDelegator<T, V> categoryPopupWindowBodyDelegator;
+    private CategoryPopupWindowListViewDelegator<T, V> categoryPopupWindowListViewDelegator;
+    private CategoryBarHeaderDelegator categoryBarHeaderDelegator;
 
     public CategoryPopupWindowListView(Context context) {
         super(context);
@@ -40,13 +41,44 @@ public class CategoryPopupWindowListView<T extends BodyAdapterItem, V extends Bo
         initContent();
     }
 
+    public void setCategoryPopupWindowListViewDelegator(CategoryPopupWindowListViewDelegator categoryPopupWindowListViewDelegator) {
+        this.categoryPopupWindowListViewDelegator = categoryPopupWindowListViewDelegator;
+    }
 
-    public void setCategoryPopupWindowBodyDelegator(CategoryPopupWindowBodyDelegator categoryPopupWindowBodyDelegator) {
-        this.categoryPopupWindowBodyDelegator = categoryPopupWindowBodyDelegator;
+    public void setCategoryBarHeaderDelegator(CategoryBarHeaderDelegator categoryBarHeaderDelegator) {
+        this.categoryBarHeaderDelegator = categoryBarHeaderDelegator;
+        if (mAdapter != null) {
+            this.mAdapter.setCategoryBarHeaderDelegator(categoryBarHeaderDelegator);
+        }
+    }
+
+    public void scrollToSelectedItem() {
+        int parentId = categoryBarHeaderDelegator.getChoosedParentId();
+        int parentPosition = 0;
+        List<T> parentItems = mAdapter.getParentAdapter().getDatas();
+        for (T parentItem : parentItems) {
+            if (parentItem.getId() == parentId) {
+                parentPosition = parentItems.indexOf(parentItem);
+            }
+        }
+        parentsList.smoothScrollToPosition(parentPosition);
+
+        int childId = categoryBarHeaderDelegator.getChoosedChildId();
+        int childPosition = 0;
+        List<V> childItems = mAdapter.getChildAdapter(parentPosition).getDatas();
+        for (V childItem : childItems) {
+            if (childItem.getId() == childId) {
+                childPosition = childItems.indexOf(childItem);
+            }
+        }
+        childrenList.smoothScrollToPosition(childPosition);
     }
 
     public void setAdapter(CategoryBodyAdapter<T, V> adapter) {
         this.mAdapter = adapter;
+        if (categoryBarHeaderDelegator != null) {
+            this.mAdapter.setCategoryBarHeaderDelegator(categoryBarHeaderDelegator);
+        }
         this.parentAdapter = adapter.getParentAdapter();
         this.childAdapter = adapter.getChildAdapter(0);
         parentsList.setAdapter(parentAdapter);
@@ -60,40 +92,47 @@ public class CategoryPopupWindowListView<T extends BodyAdapterItem, V extends Bo
         parentsList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view,final int i, long l) {
-                if (lastSelected == i) {
+                T item = (T)adapterView.getAdapter().getItem(i);
+                if (lastSelected == item.getId()) {
                     return;
                 }
 
-                lastSelected = i;
+                lastSelected = item.getId();
                 if (childAdapter == null) {
                     childAdapter = mAdapter.getChildAdapter(i);
                     childrenList.setAdapter(childAdapter);
                 } else {
-                    T item = (T)adapterView.getAdapter().getItem(i);
                     List<V> children = new ArrayList<V>(item.getChildrenItems());
                     childAdapter.updateAdapter(children);
                 }
 
-                T item = (T)adapterView.getAdapter().getItem(i);
-                mAdapter.setParentAdapterSelectedViewId(item.getId());
+                mAdapter.getCategoryBarHeaderDelegator().setChoosedParentId(item.getId());
+                V child = (V)item.getChildrenItems().get(0);
+                mAdapter.getCategoryBarHeaderDelegator().setChoosedChildId(child.getId());
                 mAdapter.getParentAdapter().notifyDataSetChanged();
-                if (categoryPopupWindowBodyDelegator != null) {
-                    categoryPopupWindowBodyDelegator.onParentItemClicked(item, adapterView, view, i , l);
+                if (categoryPopupWindowListViewDelegator != null) {
+                    categoryPopupWindowListViewDelegator.onParentItemClicked(item, adapterView, view, i , l);
                 }
+                scrollToSelectedItem();
             }
         });
         childrenList.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                 V item = (V)adapterView.getAdapter().getItem(i);
-                mAdapter.setChildAdapterSelectedViewId(item.getId());
-                mAdapter.getChildAdapter(mAdapter.getParentSelectedViewId()).notifyDataSetChanged();
 
-                if (categoryPopupWindowBodyDelegator != null) {
-                    categoryPopupWindowBodyDelegator.onChildItemClicked((V) adapterView.getAdapter().getItem(i), adapterView, view, i, l);
+                if (categoryPopupWindowListViewDelegator != null) {
+                    categoryPopupWindowListViewDelegator.onChildItemClicked(item, adapterView, view, i, l);
                 }
+                if (categoryBarHeaderDelegator != null) {
+                    mAdapter.getCategoryBarHeaderDelegator().setChoosedChildId(item.getId());
+                }
+
+                mAdapter.getCategoryBarHeaderDelegator().setChoosedChildId(item.getId());
+                mAdapter.getChildAdapter(mAdapter.getCategoryBarHeaderDelegator().getChoosedParentId()).notifyDataSetChanged();
             }
         });
         addView(content);
     }
 }
+

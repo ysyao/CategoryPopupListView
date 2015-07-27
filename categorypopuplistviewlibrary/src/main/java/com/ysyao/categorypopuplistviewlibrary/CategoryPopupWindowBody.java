@@ -16,27 +16,43 @@ public class CategoryPopupWindowBody<T extends BodyAdapterItem, V extends BodyAd
     private LayoutInflater inflater;
     private View selecteItem;
 
+    /**
+     * 1.Category Bar自带接口，当adapter当初始化parentId或者childId数据时，需通过categoryBarHeaderDelegator
+     *  来修改存储在其中的parentId和childId。(通过设定到adapter当中来完成)
+     * 2.当adpater需要更新数据时，判断更新的数据中是否有之前选中的parentId和childId，有则根据选中parentId
+     * 设定展示child数组数据，没有则初始化。(通过设定到adapter当中来完成)
+     * 3.当popup window展示或者消失的时候，Category bar上标题文字颜色、图片会改变，这里设定了onShowing()
+     * 和onDismissing()来回调。
+     */
     private CategoryBarHeaderDelegator categoryBarHeaderDelegator;
-    private PopupWindowDisplayDelegator popupWindowDelegator;
 
-    public CategoryPopupWindowBody(Activity context, View content) {
+    /**
+     * 当popup window展示或者消失的时候，Activity中其他ui可能会改变，比如背景变灰色，这里设定了onShowing()
+     * 和onDismissing()来回调。
+     */
+    private PopupWindowDisplayDelegator popupWindowDelegator;
+    private CategoryPopupWindowListView categoryPopupWindowListView;
+
+    public CategoryPopupWindowBody(Activity context, CategoryPopupWindowListView categoryPopupWindowListView) {
         this.context = context;
         this.inflater = LayoutInflater.from(context);
-        initPopupWindow(content);
-//        initDialog();
+        this.categoryPopupWindowListView = categoryPopupWindowListView;
+        initPopupWindow(categoryPopupWindowListView);
+    }
+
+    public CategoryPopupWindowListView getCategoryPopupWindowListView() {
+        return categoryPopupWindowListView;
     }
 
     public void show(View aboveView) {
         this.selecteItem = aboveView;
         popupWindow.showAsDropDown(aboveView);
-//        dialog.show();
+        if (categoryBarHeaderDelegator != null) {
+            categoryBarHeaderDelegator.onShowing(aboveView);
+        }
 
         if (popupWindowDelegator != null) {
             popupWindowDelegator.onShowing(aboveView);
-        }
-
-        if (categoryBarHeaderDelegator != null) {
-            categoryBarHeaderDelegator.onShowing(aboveView);
         }
     }
 
@@ -48,10 +64,11 @@ public class CategoryPopupWindowBody<T extends BodyAdapterItem, V extends BodyAd
 
     public void setCategoryBarHeaderDelegator(CategoryBarHeaderDelegator categoryBarHeaderDelegator) {
         this.categoryBarHeaderDelegator = categoryBarHeaderDelegator;
+        this.categoryPopupWindowListView.setCategoryBarHeaderDelegator(categoryBarHeaderDelegator);
         setDelegators();
     }
 
-    public void setPopupWindowDelegator(final PopupWindowDisplayDelegator popupWindowDelegator) {
+    public void setPopupWindowDisplayDelegator(final PopupWindowDisplayDelegator popupWindowDelegator) {
         this.popupWindowDelegator = popupWindowDelegator;
         setDelegators();
     }
@@ -70,7 +87,7 @@ public class CategoryPopupWindowBody<T extends BodyAdapterItem, V extends BodyAd
         });
     }
 
-    protected void initPopupWindow(View content) {
+    protected void initPopupWindow(CategoryPopupWindowListView content) {
         popupWindow = new PopupWindow(content, ViewGroup.LayoutParams.MATCH_PARENT,
                 caculateHeightOfPopupWindow(), true);
         popupWindow.setOutsideTouchable(true);
@@ -88,8 +105,13 @@ public class CategoryPopupWindowBody<T extends BodyAdapterItem, V extends BodyAd
         });
     }
 
+    /**
+     * 计算整个popup window高度，动态的，设置成为屏幕高度的1/2。
+     * @return  popup window高度
+     */
     private int caculateHeightOfPopupWindow() {
         Display display = context.getWindowManager().getDefaultDisplay();
         return (int) (display.getHeight() * 0.5);
     }
 }
+
